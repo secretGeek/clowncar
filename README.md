@@ -1,5 +1,8 @@
 # Clowncar: .net core static website builder
 
+🚗🤡🤡🤡🤡🤡🤡🤡 *infinite clowns emerge from a tiny car!*
+
+
 Clowncar generates a static html website, from a folder full of markdown files, using very simple templates.
 
 Clowncar is a .net core console app. It can be compiled for Windows or Linux.
