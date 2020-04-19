@@ -1080,6 +1080,9 @@ namespace Mono.Options
 
                 WriteOptionDetails(o, p, written);
             }
+
+            o.WriteLine();
+            o.Write("(* Only use one of these 3 input options)");
         }
 
         public void WriteOptionDetails(TextWriter o, Option p, int written)

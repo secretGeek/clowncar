@@ -10,20 +10,18 @@ namespace clowncar
     {
         public string RawMarkdown { get; set; }
         public string FileName { get; set; }
-        //public string Filter { get; set; }
         public string InputPath { get; set; }
         public string DefaultTemplate { get; set; }
         public string OutputPath { get; set; }
         public bool Recurse { get; set; }
         public bool NoTemplate { get; set; }
         public bool DryRun { get; set; }
-        //public string IncludeFileTypes { get; set; } = "*.jpg;*.jpeg;*.png;*.gif;*.js;*.css;*.svg";
 
         internal bool Validate(out string errors)
         {
             if (RawMarkdown == null && FileName == null && InputPath == null)
             {
-                errors = "You must specify some *input*, either `rawmarkdown (-m)`, `file (-i)`, or `path (-p)`";
+                errors = "You must specify some *input*, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
                 return false;
             }
 
@@ -32,19 +30,19 @@ namespace clowncar
                 (FileName != null && InputPath != null) ||
                 (RawMarkdown != null && FileName != null && InputPath != null))
             {
-                errors = "You must specify only *one* type of input, either `rawmarkdown (-m)`, `file (-i)`, or `path (-p)";
+                errors = "You must specify only *one* type of input, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
                 return false;
             }
 
             if (RawMarkdown != null && Recurse)
             {
-                errors = "There's no sense in combining `recurse (-r)` with `rawmarkdown (-m)`. Recurse works with a `path (-p)` (and, optionally, a `filter (-f)`)";
+                errors = "There's no sense in combining `recurse (-r)` with `rawmarkdown (-m)`. Recurse only works with a `path (-p)`";
                 return false;
             }
 
             if (FileName != null && Recurse)
             {
-                errors = "There's no sense in combining `recurse (-r)` with `file (-i)`. Recurse works with a `path (-p)` (and, optionally, a `filter (-f)`)";
+                errors = "There's no sense in combining `recurse (-r)` with `file (-f)`. Recurse only works with a `path (-p)`";
                 return false;
             }
 
@@ -70,16 +68,16 @@ namespace clowncar
 
             if (RawMarkdown != null)
             {
-                RawMarkdown = RawMarkdown.Replace("\\r\\n", "\\n").Replace("\\n", "\n");
+                RawMarkdown = RawMarkdown.Replace("\\r\\n", "\\n").Replace("\\n", Environment.NewLine);
                 var f = RawMarkdown.ToHtml();
-                //if this.OutputPath != null
+
                 if (!DryRun)
                 {
-                    Console.WriteLine(f);
+                    Console.Out.WriteLine(f);
                 }
                 else
                 {
-                    Console.WriteLine("(dryrun)" + f);
+                    Console.Out.WriteLine("(dryrun)" + f);
                 }
                 return true;
             }
@@ -98,7 +96,10 @@ namespace clowncar
                         var result = Generate(f, OutputPath, InputPath, NoTemplate, DefaultTemplate, DryRun, out errors);
                         if (!result) return false;
                     } else if ( //todo:linux case sensitive, todo: configurable set
-                          !f.Contains("\\.git\\") //todo:linux path separator
+                           !f.Contains(Path.DirectorySeparatorChar + ".git" + Path.DirectorySeparatorChar)
+                        && !f.Contains(Path.DirectorySeparatorChar + ".hg" + Path.DirectorySeparatorChar)
+                        && !f.Contains(Path.DirectorySeparatorChar + "_book" + Path.DirectorySeparatorChar)
+                        && !f.Contains(Path.DirectorySeparatorChar + "node_modules" + Path.DirectorySeparatorChar)
                         && Path.GetExtension(f).ToLowerInvariant() != ".html"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowncar"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowntent"
@@ -112,24 +113,26 @@ namespace clowncar
                             var inputFilePath = Path.GetDirectoryName(f);
                             var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
                             var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
-                            // don't copy anything FROM the output path.....
-                            //TODO: depends if OS is case-insensitive
-                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant() + "/"))
+
+                            //TODO: Linux case-insensitive bug
+                            // Do NOT copy anything FROM the output path (avoid recursive explosion)
+                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
                             {
-                                Console.WriteLine("sub-site:");
+                                Console.Out.WriteLine($"xx> (skipped:subsite) {Path.Combine(relativePath, Path.GetFileName(f))}");
                                 continue;
                             }
+
                             if (!DryRun)
                             {
                                 Console.ForegroundColor = ConsoleColor.White;
-                                Console.WriteLine($"++> {Path.Combine(relativePath, targetFileName)}");
+                                Console.Out.WriteLine($"++> {Path.Combine(relativePath, Path.GetFileName(f))}");
                                 Console.ResetColor();
                                 File.Copy(f, targetFileName, true);
                             }
                             else
                             {
                                 Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine($"(dryrun)++> {Path.Combine(relativePath, targetFileName)}");
+                                Console.Out.WriteLine($"(dryrun)++> {Path.Combine(relativePath, Path.GetFileName(f))}");
                                 Console.ResetColor();
                             }
                         }
@@ -139,16 +142,15 @@ namespace clowncar
                     {
                         var inputFilePath = Path.GetDirectoryName(f);
                         var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
-                        var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
 
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         if (!DryRun)
                         {
-                            Console.WriteLine($"xx> (skipped) {Path.Combine(relativePath, targetFileName)}");
+                            Console.Out.WriteLine($"xx> (skipped) {Path.Combine(relativePath, Path.GetFileName(f))}");
                         }
                         else
                         {
-                            Console.WriteLine($"(dryrun)xx> (skipped) {Path.Combine(relativePath, targetFileName)}");
+                            Console.Out.WriteLine($"(dryrun)xx> (skipped) {Path.Combine(relativePath, Path.GetFileName(f))}");
                         }
                         Console.ResetColor();
                     }
@@ -193,11 +195,11 @@ namespace clowncar
                     {
                         Directory.CreateDirectory(Path.Combine(outputPath, relativePath));
                         //Verbose:
-                        Console.WriteLine($"Created Directory: {Path.Combine(outputPath, relativePath)}");
+                        Console.Out.WriteLine($"Created Directory: {Path.Combine(outputPath, relativePath)}");
                     }
                     else
                     {
-                        Console.WriteLine($"(dryrun)Created Directory: {Path.Combine(outputPath, relativePath)}");
+                        Console.Out.WriteLine($"(dryrun) Created Directory: {Path.Combine(outputPath, relativePath)}");
                     }
                 }
             }
@@ -211,12 +213,12 @@ namespace clowncar
             {
                 if (!dryRun)
                 {
-                    Console.WriteLine($"~~> {(relativePath + "\\" + fileandExtension)} {f.Length} chars");
+                    Console.Out.WriteLine($"~~> {Path.Combine(relativePath, fileandExtension)}, {f.Length} chars");
                     File.WriteAllText(outputFile, f);
                 }
                 else
                 {
-                    Console.WriteLine($"(dryrun)~~> {(relativePath + "\\" + fileandExtension)} {f.Length} chars");
+                    Console.Out.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {f.Length} chars");
                 }
             }
             else
@@ -229,12 +231,12 @@ namespace clowncar
 
                     if (!dryRun)
                     {
-                        Console.WriteLine($"~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, defaultTemplate");
+                        Console.Out.WriteLine($"~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, defaultTemplate");
                         File.WriteAllText(outputFile, templateText);
                     }
                     else
                     {
-                        Console.WriteLine($"(dryrun)~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, defaultTemplate");
+                        Console.Out.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, defaultTemplate");
                     }
                 }
                 else
@@ -252,19 +254,17 @@ namespace clowncar
                         }
                     }
 
-                    //TODO: verbose
-                    //Console.WriteLine($"template:{defaultTemplate}");
                     var templateText = File.ReadAllText(defaultTemplate);
                     templateText = templateText.Replace("{{title}}", title);
                     templateText = templateText.Replace("{{body}}", f);
                     if (!dryRun)
                     {
-                        Console.WriteLine($"~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
+                        Console.WriteLine($"~~> {Path.Combine(relativePath,fileandExtension)}, {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
                         File.WriteAllText(outputFile, templateText);
                     }
                     else
                     {
-                        Console.WriteLine($"(dryrun)~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
+                        Console.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
                     }
                 }
             }
@@ -282,15 +282,15 @@ namespace clowncar
             var s = new State();
             var show_help = false;
             var p = new OptionSet() {
-                {"m|rawmarkdown=",  "the raw markdown", v => s.RawMarkdown = v},
-                {"i|file=",         "input file name",  v => s.FileName = v},
-                {"p|path=",         "path",             v => s.InputPath = v },
-                {"r|recurse",       "recurse",          v => s.Recurse = v != null },
-                {"t|template=",     "default template", v => s.DefaultTemplate = v },
-                {"n|notemplate",    "no template!",     v => s.NoTemplate = v != null },
-                {"d|dryrun",        "dry run",          v => s.DryRun = v != null },
-                {"o|output=",       "output path",      v => s.OutputPath = v },
-                {"?|h|help",        "this message",     v => show_help = v != null },
+                {"m|rawmarkdown=",  "the raw markdown *", v => s.RawMarkdown = v},
+                {"f|file=",         "input file name *",  v => s.FileName = v},
+                {"p|path=",         "path *",             v => s.InputPath = v },
+                {"r|recurse",       "recurse",            v => s.Recurse = v != null },
+                {"t|template=",     "template file name",      v => s.DefaultTemplate = v },
+                {"n|notemplate",    "no template!",       v => s.NoTemplate = v != null },
+                {"d|dryrun",        "dry run",            v => s.DryRun = v != null },
+                {"o|output=",       "output path",        v => s.OutputPath = v },
+                {"?|h|help",        "this message",       v => show_help = v != null },
             };
 
             List<string> extra;
@@ -303,9 +303,9 @@ namespace clowncar
             {
                 //Consider: Log.WriteLine(e);
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\r\nError parsing arguments");
+                Console.Out.WriteLine(Environment.NewLine + "Error parsing arguments");
 
-                Console.WriteLine(e.Message);
+                Console.Out.WriteLine(e.Message);
                 Console.ResetColor();
 
                 if (e.Option != null)
@@ -313,7 +313,7 @@ namespace clowncar
                     int i = 0;
                     p.WriteOptionPrototype(Console.Out, e.Option, ref i);
                     p.WriteOptionDetails(Console.Out, e.Option, i);
-                    Console.WriteLine();
+                    Console.Out.WriteLine();
                 }
 
                 Console.Error.WriteLine($"Try '{FileName} --help' for more information.");
@@ -356,7 +356,7 @@ namespace clowncar
             if (p.UnrecognizedOptions != null && p.UnrecognizedOptions.Count > 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\r\nError. Unrecognized commandline option" + (p.UnrecognizedOptions.Count > 1 ? "s" : "") + ".");
+                Console.WriteLine(Environment.NewLine + "Error. Unrecognized commandline option" + (p.UnrecognizedOptions.Count > 1 ? "s" : "") + ".");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.ResetColor();
                 foreach (var s in p.UnrecognizedOptions)
@@ -372,11 +372,11 @@ namespace clowncar
             }
             else
             {
-                var assemblyVersion = "0.0.1";
+                var assemblyVersion = "0.0.2";
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"\r\n{FileName}"); Console.ResetColor();
+                Console.Write($"{Environment.NewLine}{FileName}"); Console.ResetColor();
                 Console.WriteLine(" version " + assemblyVersion.ToString());
-                Console.WriteLine("Turn markdown to html.\r\n");
+                Console.WriteLine("Turn markdown to html." + Environment.NewLine);
             }
 
             Console.Write("Usage: ");
@@ -406,6 +406,7 @@ namespace clowncar
 <head>
 <meta charset='utf-8' name='viewport' content='width=device-width, initial-scale=1.0'>
 <title>{{title}}</title>
+<link rel='icon' href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤡</text></svg>'>
 </head>
 <body>
 <style>
@@ -415,20 +416,18 @@ body {
   margin:auto;
   color:#333;
   font-size:1.2em;
-  background-color:#F2F2F2;
+  background-color:#FFF;
 }
 pre {
   white-space:pre-wrap;
   margin-left:4ch;
-  background-color:#FFF;
+  background-color:#EEE;
   padding:1ch;
-  border-radius:4px;
+  border-radius:1ch;
 }
 </style>
 {{body}}
 </body>
-<script>
-</script>
 </html>";
     }
 }

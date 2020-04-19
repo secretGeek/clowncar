@@ -15,27 +15,27 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 
 ## Help -- usage
 
-	> .\clowncar.exe -?
-	
-	clowncar version 0.0.1
-	Turn markdown to html.
+    > .\clowncar.exe -?
+    
+    clowncar version 0.0.1
+    Turn markdown to html.
 
-	Usage: clowncar [options]
+    Usage: clowncar [options]
 
-	Options:
-		-m, --rawmarkdown=VALUE    the raw markdown
-		-i, --file=VALUE           input file name
-		-p, --path=VALUE           path
-		-r, --recurse              recurse
-		-t, --template=VALUE       default template
-		-n, --notemplate           no template!
-		-d, --dryrun               dry run
-		-o, --output=VALUE         output path
-		-?, -h, --help             this message
+    Options:
+        -m, --rawmarkdown=VALUE    the raw markdown *
+        -f, --file=VALUE           input file name *
+        -p, --path=VALUE           path *
+        -r, --recurse              recurse
+        -t, --template=VALUE       template file name
+        -n, --notemplate           no template!
+        -d, --dryrun               dry run
+        -o, --output=VALUE         output path
+        -?, -h, --help             this message
 
+    (* Only use one of these 3 input options)
 
 ## Examples:
-
 
 ### Simplest possible example
 
@@ -118,7 +118,7 @@ The meanings of each type of output are based on the first few characters, to wi
 
  * `~~>` is used for a file that was generated
  * `++>` is used for a file that was copied to the output path. All files are copied except a few types: `.md`, `.html`, `.clowntent`, `.pre`, `.ok`, `.ps1`.
- * `XX>` is used for a file that is skipped -- it is not copied to the output path. In addition to the types listed above, the `.git` folder is also ignored. (Consider: node_modules folder should be ignored too.)
+ * `XX>` is used for a file that is skipped -- it is not copied to the output path. In addition to the types listed above, clowncar skips any content nested under a ".git", ".hg", "node_modules", or "_book" folder.
 
 (Note that copying of files will only happen if an "output path" (`--output`, `-o`) is specified.)
 
@@ -145,8 +145,7 @@ Our example above would become:
 
 Here's a website I built using clowncar:
 
- * <https://til.secretgeek.net/> &mdash; website built with clowncar, based on [these markdown files](https://github.com/secretGeek/today-i-learned-staging)
-
+ * **[til.secretgeek.net](https://til.secretgeek.net)** &mdash; website built with clowncar, based on [these markdown files](https://github.com/secretGeek/today-i-learned-staging)
 
 
 
