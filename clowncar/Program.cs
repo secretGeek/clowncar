@@ -97,11 +97,12 @@ namespace clowncar
                     {
                         var result = Generate(f, OutputPath, InputPath, NoTemplate, DefaultTemplate, DryRun, out errors);
                         if (!result) return false;
-                    } else if (
-                          !Path.GetDirectoryName(f).Contains("\\.git\\")
+                    } else if ( //todo:linux case sensitive, todo: configurable set
+                          !f.Contains("\\.git\\") //todo:linux path separator
                         && Path.GetExtension(f).ToLowerInvariant() != ".html"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowncar"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowntent"
+                        && Path.GetExtension(f).ToLowerInvariant() != ".gitignore"
                         && Path.GetExtension(f).ToLowerInvariant() != ".pre"
                         && Path.GetExtension(f).ToLowerInvariant() != ".ok"
                         && Path.GetExtension(f).ToLowerInvariant() != ".ps1")
