@@ -97,7 +97,9 @@ namespace clowncar
                     {
                         var result = Generate(f, OutputPath, InputPath, NoTemplate, DefaultTemplate, DryRun, out errors);
                         if (!result) return false;
-                    } else if (Path.GetExtension(f).ToLowerInvariant() != ".html"
+                    } else if (
+                          !Path.GetDirectoryName(f).Contains("\\.git\\")
+                        && Path.GetExtension(f).ToLowerInvariant() != ".html"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowncar"
                         && Path.GetExtension(f).ToLowerInvariant() != ".clowntent"
                         && Path.GetExtension(f).ToLowerInvariant() != ".pre"
@@ -111,8 +113,9 @@ namespace clowncar
                             var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
                             // don't copy anything FROM the output path.....
                             //TODO: depends if OS is case-insensitive
-                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant()))
+                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant() + "/"))
                             {
+                                Console.WriteLine("sub-site:");
                                 continue;
                             }
                             if (!DryRun)
@@ -133,8 +136,19 @@ namespace clowncar
                     }
                     else
                     {
+                        var inputFilePath = Path.GetDirectoryName(f);
+                        var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
+                        var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
+
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"skipped: {f}");
+                        if (!DryRun)
+                        {
+                            Console.WriteLine($"xx> (skipped) {Path.Combine(relativePath, targetFileName)}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"(dryrun)xx> (skipped) {Path.Combine(relativePath, targetFileName)}");
+                        }
                         Console.ResetColor();
                     }
                 }
@@ -154,11 +168,19 @@ namespace clowncar
 
             var s = File.ReadAllText(fileName);
             var f = s.ToHtml();
-
+            var title = Path.GetFileNameWithoutExtension(fileName).Replace("_", " ");
             var fileandExtension = Path.GetFileNameWithoutExtension(fileName) + ".html";
             var inputFilePath = Path.GetDirectoryName(fileName);
-            var relativePath = Path.GetRelativePath(inputRootPath, inputFilePath);
+            if (string.IsNullOrWhiteSpace(inputRootPath))
+            {
+                inputRootPath = Directory.GetCurrentDirectory();
+            }
+            if (string.IsNullOrWhiteSpace(inputFilePath))
+            {
+                inputFilePath = Directory.GetCurrentDirectory();
+            }
 
+            var relativePath = Path.GetRelativePath(inputRootPath, inputFilePath);
             var outputFile = (string)null;
 
             if (outputPath != null)
@@ -201,6 +223,7 @@ namespace clowncar
                 if (string.IsNullOrWhiteSpace(defaultTemplate))
                 {
                     var templateText = Defaults.TemplateText;
+                    templateText = templateText.Replace("{{title}}", title);
                     templateText = templateText.Replace("{{body}}", f);
 
                     if (!dryRun)
@@ -231,15 +254,16 @@ namespace clowncar
                     //TODO: verbose
                     //Console.WriteLine($"template:{defaultTemplate}");
                     var templateText = File.ReadAllText(defaultTemplate);
+                    templateText = templateText.Replace("{{title}}", title);
                     templateText = templateText.Replace("{{body}}", f);
                     if (!dryRun)
                     {
-                        Console.WriteLine($"~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {defaultTemplate}");
+                        Console.WriteLine($"~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
                         File.WriteAllText(outputFile, templateText);
                     }
                     else
                     {
-                        Console.WriteLine($"(dryrun)~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {defaultTemplate}");
+                        Console.WriteLine($"(dryrun)~~> {(relativePath + "\\" + fileandExtension)} {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
                     }
                 }
             }
