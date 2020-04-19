@@ -59,7 +59,7 @@ Result:
 
 ### Convert a single file (with default template or none)
 
-  .\clowncar.exe --file="example.md"
+    .\clowncar.exe --file="example.md"
 
 Assuming there is a file called `example.md` in the local folder, there will now also be a file called `example.html` that uses the in-built [default template](default-template.md)
 
@@ -88,7 +88,7 @@ There are no other fancy features or capabilities in the template language. It's
 
 You can specify a template from the command line:
 
-  .\clowncar.exe --file="example.md" --template="template.clowntent"
+    .\clowncar.exe --file="example.md" --template="template.clowntent"
 
 Now, instead of using the built-in default template, it will use the template file you have specified.
 
@@ -104,7 +104,7 @@ Some suggestions:
 * You should use your own custom `--template` 
 
 
-  .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse
+    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse
 
 You'll see 1 line of output from clowncar about every single file it encounters. There are a few different lines you'll see:
 
@@ -139,7 +139,16 @@ When the `--dryrun` flag is set, none of the actions are actually performed.
 
 Our example above would become:
 
-  .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun
+    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun
+
+## Live Demonstration
+
+Here's a website I built using clowncar:
+
+ * <https://til.secretgeek.net/> &mdash; website built with clowncar, based on [these markdown files](https://github.com/secretGeek/today-i-learned-staging)
+
+
+
 
 ## What's next?
 
