@@ -16,8 +16,7 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 ## Help -- usage
 
     > .\clowncar.exe -?
-    
-    clowncar version 0.0.1
+    clowncar version 0.0.2
     Turn markdown to html.
 
     Usage: clowncar [options]
@@ -27,13 +26,15 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
         -f, --file=VALUE           input file name *
         -p, --path=VALUE           path *
         -r, --recurse              recurse
+        -o, --output=VALUE         output path
         -t, --template=VALUE       template file name
         -n, --notemplate           no template!
         -d, --dryrun               dry run
-        -o, --output=VALUE         output path
+        -z, --lessnoise            less noise in output
         -?, -h, --help             this message
 
     (* Only use one of these 3 input options)
+
 
 ## Examples:
 
@@ -118,9 +119,25 @@ The meanings of each type of output are based on the first few characters, to wi
 
  * `~~>` is used for a file that was generated
  * `++>` is used for a file that was copied to the output path. All files are copied except a few types: `.md`, `.html`, `.clowntent`, `.pre`, `.ok`, `.ps1`.
- * `XX>` is used for a file that is skipped -- it is not copied to the output path. In addition to the types listed above, clowncar skips any content nested under a ".git", ".hg", "node_modules", or "_book" folder.
+ * `xx>` is used for a file that is skipped -- it is not copied to the output path. In addition to the types listed above, clowncar skips any content nested under a ".git", ".hg", "node_modules", or "_book" folder.
 
 (Note that copying of files will only happen if an "output path" (`--output`, `-o`) is specified.)
+
+## Want less noise from the console?
+
+Because **many** files can be skipped (particularly if there are `.git` or `node_modules` folders present.) the console output can be quite noisy 
+
+Use the Less Noise Paramaeter (`--lessnoise` or `-z`) to stop clowncar from telling you about the files it has skipped.
+
+It will still tell you about the files it generated, and the files it copied.
+
+To produce no output, redirect both standard and error streams to null, e.g. 
+
+    .\clowncar.exe -p="~\my-notes" -o="~\my-website" -t="template.clowntent" -r 2>&1 | out-null
+
+...or, equivalent:
+
+    .\clowncar.exe -p="~\my-notes" -o="~\my-website" -t="template.clowntent" -r 2>&1> $null
 
 
 ### How to be safe... use `--dryrun`
@@ -141,6 +158,13 @@ Our example above would become:
 
     .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun
 
+To make no changes and see now output you could use:
+
+
+    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun 2>&1> $null
+
+...or just don't run *any* command.
+
 ## Live Demonstration
 
 Here's a website I built using clowncar:
@@ -148,7 +172,7 @@ Here's a website I built using clowncar:
  * **[til.secretgeek.net](https://til.secretgeek.net)** &mdash; website built with clowncar, based on [these markdown files](https://github.com/secretGeek/today-i-learned-staging)
 
 
-
 ## What's next?
 
 I am not sure. I need to add a contributing file, blog about it, add some more features, survive this global pandemic, get my life in order. Y'know... the usual.
+

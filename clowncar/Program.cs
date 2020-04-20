@@ -6,273 +6,6 @@ using System.IO;
 
 namespace clowncar
 {
-    public class State
-    {
-        public string RawMarkdown { get; set; }
-        public string FileName { get; set; }
-        public string InputPath { get; set; }
-        public string DefaultTemplate { get; set; }
-        public string OutputPath { get; set; }
-        public bool Recurse { get; set; }
-        public bool NoTemplate { get; set; }
-        public bool DryRun { get; set; }
-
-        internal bool Validate(out string errors)
-        {
-            if (RawMarkdown == null && FileName == null && InputPath == null)
-            {
-                errors = "You must specify some *input*, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
-                return false;
-            }
-
-            if ((RawMarkdown != null && FileName != null) ||
-                (RawMarkdown != null && InputPath != null) ||
-                (FileName != null && InputPath != null) ||
-                (RawMarkdown != null && FileName != null && InputPath != null))
-            {
-                errors = "You must specify only *one* type of input, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
-                return false;
-            }
-
-            if (RawMarkdown != null && Recurse)
-            {
-                errors = "There's no sense in combining `recurse (-r)` with `rawmarkdown (-m)`. Recurse only works with a `path (-p)`";
-                return false;
-            }
-
-            if (FileName != null && Recurse)
-            {
-                errors = "There's no sense in combining `recurse (-r)` with `file (-f)`. Recurse only works with a `path (-p)`";
-                return false;
-            }
-
-            if (InputPath != null && !Directory.Exists(InputPath))
-            {
-                errors = $"The `path (-p)` does not exist {InputPath}";
-                return false;
-            }
-
-            if (OutputPath != null && !Directory.Exists(OutputPath))
-            {
-                errors = "The `outputpath (-o)` does not exist";
-                return false;
-            }
-
-            errors = null;
-            return true;
-        }
-
-        internal bool Run(out string errors)
-        {
-            errors = null;
-
-            if (RawMarkdown != null)
-            {
-                RawMarkdown = RawMarkdown.Replace("\\r\\n", "\\n").Replace("\\n", Environment.NewLine);
-                var f = RawMarkdown.ToHtml();
-
-                if (!DryRun)
-                {
-                    Console.Out.WriteLine(f);
-                }
-                else
-                {
-                    Console.Out.WriteLine("(dryrun)" + f);
-                }
-                return true;
-            }
-
-            if (FileName != null)
-            {
-                return Generate(FileName, OutputPath, InputPath, NoTemplate, DefaultTemplate, DryRun, out errors);
-            }
-
-            if (InputPath != null)
-            {
-                foreach (var f in Directory.EnumerateFiles(InputPath, "*.*", Recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
-                {
-                    if (Path.GetExtension(f).ToLowerInvariant() == ".md")
-                    {
-                        var result = Generate(f, OutputPath, InputPath, NoTemplate, DefaultTemplate, DryRun, out errors);
-                        if (!result) return false;
-                    } else if ( //todo:linux case sensitive, todo: configurable set
-                           !f.Contains(Path.DirectorySeparatorChar + ".git" + Path.DirectorySeparatorChar)
-                        && !f.Contains(Path.DirectorySeparatorChar + ".hg" + Path.DirectorySeparatorChar)
-                        && !f.Contains(Path.DirectorySeparatorChar + "_book" + Path.DirectorySeparatorChar)
-                        && !f.Contains(Path.DirectorySeparatorChar + "node_modules" + Path.DirectorySeparatorChar)
-                        && Path.GetExtension(f).ToLowerInvariant() != ".html"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".clowncar"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".clowntent"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".gitignore"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".pre"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".ok"
-                        && Path.GetExtension(f).ToLowerInvariant() != ".ps1")
-                    {
-                        if (!string.IsNullOrWhiteSpace(OutputPath))
-                        {
-                            var inputFilePath = Path.GetDirectoryName(f);
-                            var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
-                            var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
-
-                            //TODO: Linux case-insensitive bug
-                            // Do NOT copy anything FROM the output path (avoid recursive explosion)
-                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
-                            {
-                                Console.Out.WriteLine($"xx> (skipped:subsite) {Path.Combine(relativePath, Path.GetFileName(f))}");
-                                continue;
-                            }
-
-                            if (!DryRun)
-                            {
-                                Console.ForegroundColor = ConsoleColor.White;
-                                Console.Out.WriteLine($"++> {Path.Combine(relativePath, Path.GetFileName(f))}");
-                                Console.ResetColor();
-                                File.Copy(f, targetFileName, true);
-                            }
-                            else
-                            {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.Out.WriteLine($"(dryrun)++> {Path.Combine(relativePath, Path.GetFileName(f))}");
-                                Console.ResetColor();
-                            }
-                        }
-                        
-                    }
-                    else
-                    {
-                        var inputFilePath = Path.GetDirectoryName(f);
-                        var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
-
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        if (!DryRun)
-                        {
-                            Console.Out.WriteLine($"xx> (skipped) {Path.Combine(relativePath, Path.GetFileName(f))}");
-                        }
-                        else
-                        {
-                            Console.Out.WriteLine($"(dryrun)xx> (skipped) {Path.Combine(relativePath, Path.GetFileName(f))}");
-                        }
-                        Console.ResetColor();
-                    }
-                }
-            }
-
-            return true;
-        }
-
-        private static bool Generate(string fileName, string outputPath, string inputRootPath, bool noTemplate, string defaultTemplate, bool dryRun, out string errors)
-        {
-            errors = null;
-            if (!File.Exists(fileName))
-            {
-                errors = $"Input File does not exist ({fileName})";
-                return false;
-            }
-
-            var s = File.ReadAllText(fileName);
-            var f = s.ToHtml();
-            var title = Path.GetFileNameWithoutExtension(fileName).Replace("_", " ");
-            var fileandExtension = Path.GetFileNameWithoutExtension(fileName) + ".html";
-            var inputFilePath = Path.GetDirectoryName(fileName);
-            if (string.IsNullOrWhiteSpace(inputRootPath))
-            {
-                inputRootPath = Directory.GetCurrentDirectory();
-            }
-            if (string.IsNullOrWhiteSpace(inputFilePath))
-            {
-                inputFilePath = Directory.GetCurrentDirectory();
-            }
-
-            var relativePath = Path.GetRelativePath(inputRootPath, inputFilePath);
-            var outputFile = (string)null;
-
-            if (outputPath != null)
-            {
-                outputFile = Path.Combine(outputPath, relativePath, fileandExtension);
-                if (!Directory.Exists(Path.Combine(outputPath, relativePath)))
-                {
-                    if (!dryRun)
-                    {
-                        Directory.CreateDirectory(Path.Combine(outputPath, relativePath));
-                        //Verbose:
-                        Console.Out.WriteLine($"Created Directory: {Path.Combine(outputPath, relativePath)}");
-                    }
-                    else
-                    {
-                        Console.Out.WriteLine($"(dryrun) Created Directory: {Path.Combine(outputPath, relativePath)}");
-                    }
-                }
-            }
-            else
-            {
-                outputFile = Path.Combine(inputRootPath, relativePath, fileandExtension);
-            }
-            
-            //Consider: Encoding??
-            if (noTemplate)
-            {
-                if (!dryRun)
-                {
-                    Console.Out.WriteLine($"~~> {Path.Combine(relativePath, fileandExtension)}, {f.Length} chars");
-                    File.WriteAllText(outputFile, f);
-                }
-                else
-                {
-                    Console.Out.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {f.Length} chars");
-                }
-            }
-            else
-            {
-                if (string.IsNullOrWhiteSpace(defaultTemplate))
-                {
-                    var templateText = Defaults.TemplateText;
-                    templateText = templateText.Replace("{{title}}", title);
-                    templateText = templateText.Replace("{{body}}", f);
-
-                    if (!dryRun)
-                    {
-                        Console.Out.WriteLine($"~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, defaultTemplate");
-                        File.WriteAllText(outputFile, templateText);
-                    }
-                    else
-                    {
-                        Console.Out.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, defaultTemplate");
-                    }
-                }
-                else
-                {
-                    if (!File.Exists(defaultTemplate))
-                    {
-                        if (File.Exists(Path.Combine(inputRootPath, defaultTemplate)))
-                        {
-                            defaultTemplate = Path.Combine(inputRootPath, defaultTemplate);
-                        }
-                        else
-                        {
-                            errors = $"Template not found ({defaultTemplate})";
-                            return false;
-                        }
-                    }
-
-                    var templateText = File.ReadAllText(defaultTemplate);
-                    templateText = templateText.Replace("{{title}}", title);
-                    templateText = templateText.Replace("{{body}}", f);
-                    if (!dryRun)
-                    {
-                        Console.WriteLine($"~~> {Path.Combine(relativePath,fileandExtension)}, {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
-                        File.WriteAllText(outputFile, templateText);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"(dryrun)~~> {Path.Combine(relativePath, fileandExtension)}, {templateText.Length} chars, template: {Path.GetFileName(defaultTemplate)}");
-                    }
-                }
-            }
-
-            return true;
-        }
-    }
-
     class Program
     {
         static string FileName = "clowncar";
@@ -286,10 +19,11 @@ namespace clowncar
                 {"f|file=",         "input file name *",  v => s.FileName = v},
                 {"p|path=",         "path *",             v => s.InputPath = v },
                 {"r|recurse",       "recurse",            v => s.Recurse = v != null },
+                {"o|output=",       "output path",        v => s.OutputPath = v },
                 {"t|template=",     "template file name",      v => s.DefaultTemplate = v },
                 {"n|notemplate",    "no template!",       v => s.NoTemplate = v != null },
                 {"d|dryrun",        "dry run",            v => s.DryRun = v != null },
-                {"o|output=",       "output path",        v => s.OutputPath = v },
+                {"z|lessnoise",     "less noise in output",v=> s.LessNoise = v != null },
                 {"?|h|help",        "this message",       v => show_help = v != null },
             };
 
@@ -301,7 +35,6 @@ namespace clowncar
             }
             catch (OptionException e)
             {
-                //Consider: Log.WriteLine(e);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Out.WriteLine(Environment.NewLine + "Error parsing arguments");
 
@@ -356,36 +89,36 @@ namespace clowncar
             if (p.UnrecognizedOptions != null && p.UnrecognizedOptions.Count > 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Environment.NewLine + "Error. Unrecognized commandline option" + (p.UnrecognizedOptions.Count > 1 ? "s" : "") + ".");
+                Console.Error.WriteLine("Error. Unrecognized commandline option" + (p.UnrecognizedOptions.Count > 1 ? "s" : "") + ".");
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.ResetColor();
                 foreach (var s in p.UnrecognizedOptions)
                 {
-                    Console.Write("Unrecognized: ");
+                    Console.Out.Write("Unrecognized: ");
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(s);
+                    Console.Out.WriteLine(s);
                     Console.ResetColor();
                 }
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Please see below for all valid options.");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Out.WriteLine("Please see below for all valid options.");
                 Console.ResetColor();
             }
             else
             {
                 var assemblyVersion = "0.0.2";
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Write($"{Environment.NewLine}{FileName}"); Console.ResetColor();
-                Console.WriteLine(" version " + assemblyVersion.ToString());
-                Console.WriteLine("Turn markdown to html." + Environment.NewLine);
+                Console.Out.Write($"{Environment.NewLine}{FileName}"); Console.ResetColor();
+                Console.Out.WriteLine(" version " + assemblyVersion.ToString());
+                Console.Out.WriteLine("Turn markdown to html." + Environment.NewLine);
             }
 
-            Console.Write("Usage: ");
+            Console.Out.Write("Usage: ");
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("clowncar ");
+            Console.Out.Write("clowncar ");
             Console.ResetColor();
-            Console.WriteLine("[options]");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
+            Console.Out.WriteLine("[options]");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("Options:");
             p.WriteOptionDescriptions(Console.Out);
         }
     }
@@ -429,5 +162,242 @@ pre {
 {{body}}
 </body>
 </html>";
+    }
+
+    public class State
+    {
+        public string RawMarkdown { get; set; }
+        public string FileName { get; set; }
+        public string InputPath { get; set; }
+        public string DefaultTemplate { get; set; }
+        public string OutputPath { get; set; }
+        public bool Recurse { get; set; }
+        public bool NoTemplate { get; set; }
+        public bool LessNoise { get; set; }
+        public bool DryRun { get; set; }
+
+        internal bool Validate(out string errors)
+        {
+            if (RawMarkdown == null && FileName == null && InputPath == null)
+            {
+                errors = "You must specify some *input*, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
+                return false;
+            }
+
+            if ((RawMarkdown != null && FileName != null) ||
+                (RawMarkdown != null && InputPath != null) ||
+                (FileName != null && InputPath != null) ||
+                (RawMarkdown != null && FileName != null && InputPath != null))
+            {
+                errors = "You must specify only *one* type of input, either `rawmarkdown (-m)`, `file (-f)`, or `path (-p)`";
+                return false;
+            }
+
+            if (RawMarkdown != null && Recurse)
+            {
+                errors = "There's no sense in combining `recurse (-r)` with `rawmarkdown (-m)`. Recurse only works with a `path (-p)`";
+                return false;
+            }
+
+            if (FileName != null && Recurse)
+            {
+                errors = "There's no sense in combining `recurse (-r)` with `file (-f)`. Recurse only works with a `path (-p)`";
+                return false;
+            }
+
+            if (InputPath != null && !Directory.Exists(InputPath))
+            {
+                errors = $"The `path (-p)` does not exist {InputPath}";
+                return false;
+            }
+
+            if (OutputPath != null && !Directory.Exists(OutputPath))
+            {
+                errors = "The `outputpath (-o)` does not exist";
+                return false;
+            }
+
+            errors = null;
+            return true;
+        }
+
+        internal bool Run(out string errors)
+        {
+            errors = null;
+            var drt = DryRun ? "(dryrun)" : ""; //Dry Run token to put in output;
+
+            if (RawMarkdown != null) NoTemplate = NoTemplate || (DefaultTemplate == null);
+
+            if (!ResolveTemplate(NoTemplate, DefaultTemplate, InputPath, drt, out string templateText, out errors)) return false;
+
+            if (RawMarkdown != null)
+            {
+                RawMarkdown = RawMarkdown.Replace("\\r\\n", "\\n").Replace("\\n", Environment.NewLine);
+
+
+
+                //var templateText =
+                var result = Apply(RawMarkdown, "", templateText);
+                //var f = RawMarkdown.ToHtml();
+                
+                Console.Out.WriteLine(drt + result);
+                
+                return true;
+            }
+
+//            if (!ResolveTemplate(NoTemplate, DefaultTemplate, InputPath, drt, out string templateText, out errors)) return false;
+
+            if (FileName != null)
+            {
+                return Generate(FileName, OutputPath, InputPath, templateText, DryRun, LessNoise, out errors);
+            }
+
+            if (InputPath != null)
+            {
+                foreach (var f in Directory.EnumerateFiles(InputPath, "*.*", Recurse ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+                {
+                    if (Path.GetExtension(f).ToLowerInvariant() == ".md")
+                    {
+                        var result = Generate(f, OutputPath, InputPath, templateText, DryRun, LessNoise, out errors);
+                        if (!result) return false;
+                    }
+                    else 
+                    if ( //todo:linux case sensitive, todo: configurable set
+                          !f.Contains(Path.DirectorySeparatorChar + ".git" + Path.DirectorySeparatorChar)
+                      &&  !f.Contains(Path.DirectorySeparatorChar + ".hg" + Path.DirectorySeparatorChar)
+                      &&  !f.Contains(Path.DirectorySeparatorChar + "_book" + Path.DirectorySeparatorChar)
+                      &&  !f.Contains(Path.DirectorySeparatorChar + "node_modules" + Path.DirectorySeparatorChar)
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".html"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".clowncar"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".clowntent"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".gitignore"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".pre"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".ok"
+                      &&  Path.GetExtension(f).ToLowerInvariant() != ".ps1")
+                    {
+                        if (!string.IsNullOrWhiteSpace(OutputPath))
+                        {
+                            var inputFilePath = Path.GetDirectoryName(f);
+                            var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
+                            var targetFileName = Path.Combine(OutputPath, relativePath, Path.GetFileName(f));
+
+                            //TODO: Linux case-insensitive bug
+                            // Do NOT copy anything FROM the output path (avoid recursive explosion)
+                            if (inputFilePath.ToLowerInvariant().StartsWith(OutputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
+                            {
+                                if (!LessNoise)
+                                {
+                                    Console.Out.WriteLine($"{drt}xx> (skipped:subsite) {Path.Combine(relativePath, Path.GetFileName(f))}");
+                                }
+                                continue;
+                            }
+
+                            Console.ForegroundColor = ConsoleColor.White;
+                            Console.Out.WriteLine($"{drt}++> {Path.Combine(relativePath, Path.GetFileName(f))}");
+                            Console.ResetColor();
+                            if (!DryRun) File.Copy(f, targetFileName, true);
+                        }
+                    }
+                    else
+                    {
+                        var inputFilePath = Path.GetDirectoryName(f);
+                        var relativePath = Path.GetRelativePath(InputPath, inputFilePath);
+
+                        if (!LessNoise)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.Out.WriteLine($"{drt}xx> (skipped) {Path.Combine(relativePath, Path.GetFileName(f))}");
+                            Console.ResetColor();
+                        }
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool ResolveTemplate(bool noTemplate, string defaultTemplate, string inputPath, string drt, out string templateText, out string errors)
+        {
+            errors = null;
+
+            templateText = noTemplate ? "{{body}}" : Defaults.TemplateText;
+
+            if (string.IsNullOrWhiteSpace(defaultTemplate)) return true;
+
+            if (!File.Exists(defaultTemplate))
+            {
+                if (!string.IsNullOrEmpty(inputPath) && File.Exists(Path.Combine(inputPath, defaultTemplate)))
+                {
+                    defaultTemplate = Path.Combine(inputPath, defaultTemplate);
+                }
+                else
+                {
+                    errors = $"{drt}Template not found ({defaultTemplate})";
+                    templateText = null;
+                    return false;
+                }
+            }
+
+            templateText = File.ReadAllText(defaultTemplate);
+
+            return true;
+        }
+
+        private static bool Generate(string fileName, string outputPath, string inputRootPath, string templateText, bool dryRun, bool lessNoise, out string errors)
+        {
+            var drt = dryRun ? "(dryrun)" : "";
+            errors = null;
+            if (!File.Exists(fileName))
+            {
+                errors = $"Input File does not exist ({fileName})";
+                return false;
+            }
+
+            var s = File.ReadAllText(fileName);
+
+            var title = Path.GetFileNameWithoutExtension(fileName).Replace("_", " ");
+            var result = Apply(s, title, templateText);
+
+            var fileandExtension = Path.GetFileNameWithoutExtension(fileName) + ".html";
+            var inputFilePath = Path.GetDirectoryName(fileName);
+            if (string.IsNullOrWhiteSpace(inputRootPath))
+            {
+                inputRootPath = Directory.GetCurrentDirectory();
+            }
+            if (string.IsNullOrWhiteSpace(inputFilePath))
+            {
+                inputFilePath = Directory.GetCurrentDirectory();
+            }
+
+            var relativePath = Path.GetRelativePath(inputRootPath, inputFilePath);
+            var outputFile = (string)null;
+
+            if (outputPath != null)
+            {
+                outputFile = Path.Combine(outputPath, relativePath, fileandExtension);
+                if (!Directory.Exists(Path.Combine(outputPath, relativePath)))
+                {
+                    if (!dryRun) Directory.CreateDirectory(Path.Combine(outputPath, relativePath));
+
+                    if (!lessNoise) { 
+                        Console.Out.WriteLine($"{drt}+!> Created Directory: {Path.Combine(outputPath, relativePath)}");
+                    }
+                }
+            }
+            else
+            {
+                outputFile = Path.Combine(inputRootPath, relativePath, fileandExtension);
+            }
+
+            if (!dryRun) File.WriteAllText(outputFile, result);
+            Console.Out.WriteLine($"{drt}~~> {Path.Combine(relativePath, fileandExtension)}, {result.Length} chars");
+
+            return true;
+        }
+
+        private static string Apply(string rawMarkdown, string title, string templateText)
+        {
+            return templateText.Replace("{{title}}", title).Replace("{{body}}", rawMarkdown.ToHtml());
+        }
     }
 }
