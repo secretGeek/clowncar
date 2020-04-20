@@ -16,7 +16,7 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 ## Help -- usage
 
     > .\clowncar.exe -?
-    clowncar version 0.0.2
+    clowncar version 0.0.3
     Turn markdown to html.
 
     Usage: clowncar [options]
@@ -29,7 +29,7 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
         -o, --output=VALUE         output path
         -t, --template=VALUE       template file name
         -n, --notemplate           no template!
-        -d, --dryrun               dry run
+        -d, --dry-run               dry run
         -z, --lessnoise            less noise in output
         -?, -h, --help             this message
 
@@ -140,28 +140,28 @@ To produce no output, redirect both standard and error streams to null, e.g.
     .\clowncar.exe -p="~\my-notes" -o="~\my-website" -t="template.clowntent" -r 2>&1> $null
 
 
-### How to be safe... use `--dryrun`
+### How to be safe... use `--dry-run`
 
-There is also an option called "dry run" (`--dryrun` or just `-d`) that will not stop `clowncar` from actually changing any files. 
+There is also an option called "dry run" (`--dry-run` or just `-d`) that will not stop `clowncar` from actually changing any files. 
 
 Instead, it will just show you what it *would* have done. (This is similar to the `-whatif` convention from Powershell.)
 
-The messages sent to the console are the same, except that every line of text has `(dryrun)` before it. So for example you might see:
+The messages sent to the console are the same, except that every line of text has `(dry-run)` before it. So for example you might see:
 
-    (dryrun)~~> example.html 1666 chars, template: template.clowntent
-    (dryrun)++> screenshot.jpg
-    (dryrun)xx> (skipped) example.html
+    (dry-run)~~> example.html 1666 chars, template: template.clowntent
+    (dry-run)++> screenshot.jpg
+    (dry-run)xx> (skipped) example.html
 
-When the `--dryrun` flag is set, none of the actions are actually performed.
+When the `--dry-run` flag is set, none of the actions are actually performed.
 
 Our example above would become:
 
-    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun
+    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dry-run
 
 To make no changes and see now output you could use:
 
 
-    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dryrun 2>&1> $null
+    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dry-run 2>&1> $null
 
 ...or just don't run *any* command.
 
@@ -175,4 +175,9 @@ Here's a website I built using clowncar:
 ## What's next?
 
 I am not sure. I need to add a contributing file, blog about it, add some more features, survive this global pandemic, get my life in order. Y'know... the usual.
+
+Currently the build does *not* pack the entire thing into a single self-contained executable/binary. I will do that once it becomes a standard part of .net core, soonish. (I'm not going to use one of those existing assembly weavers such as [fody](https://github.com/Fody/Fody) though they do sound interesting.)
+
+I'd like to have some well-known-themes/templates that can be applied. A list of available themes is discovered by checking: clowntown.secretgeek.net/themes/ (for example) and if you say "clowncare.exe --famous-theme=minimal-dark" then it will look for a list of files and their relative path, from a page returned from clowntown.secretgeek.net/themes/minimal-dark/, and it then downloads each file in that list, and puts them in the relative path, for use by the generator. Some kind of very simple file-based api, that I can maintain by having people do push requsts to a folder at a site.
+
 

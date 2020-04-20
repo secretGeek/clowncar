@@ -8,22 +8,23 @@ namespace clowncar
 {
     class Program
     {
-        static string FileName = "clowncar";
+        static readonly string FileName = "clowncar";
+        static readonly string AssemblyVersion = "0.0.3";
 
         static int Main(string[] args)
         {
-            var s = new State();
+            var state = new State();
             var show_help = false;
             var p = new OptionSet() {
-                {"m|rawmarkdown=",  "the raw markdown *", v => s.RawMarkdown = v},
-                {"f|file=",         "input file name *",  v => s.FileName = v},
-                {"p|path=",         "path *",             v => s.InputPath = v },
-                {"r|recurse",       "recurse",            v => s.Recurse = v != null },
-                {"o|output=",       "output path",        v => s.OutputPath = v },
-                {"t|template=",     "template file name",      v => s.DefaultTemplate = v },
-                {"n|notemplate",    "no template!",       v => s.NoTemplate = v != null },
-                {"d|dryrun",        "dry run",            v => s.DryRun = v != null },
-                {"z|lessnoise",     "less noise in output",v=> s.LessNoise = v != null },
+                {"m|rawmarkdown=",  "the raw markdown *", v => state.RawMarkdown = v},
+                {"f|file=",         "input file name *",  v => state.FileName = v},
+                {"p|path=",         "path *",             v => state.InputPath = v },
+                {"r|recurse",       "recurse",            v => state.Recurse = v != null },
+                {"o|output=",       "output path",        v => state.OutputPath = v },
+                {"t|template=",     "template file name",      v => state.DefaultTemplate = v },
+                {"n|notemplate",    "no template!",       v => state.NoTemplate = v != null },
+                {"d|dry-run",       "dry run doesn't change files",            v => state.DryRun = v != null },
+                {"z|lessnoise",     "less noise in output",v=> state.LessNoise = v != null },
                 {"?|h|help",        "this message",       v => show_help = v != null },
             };
 
@@ -65,7 +66,7 @@ namespace clowncar
                 return 0;
             }
 
-            if (!s.Validate(out string validationError))
+            if (!state.Validate(out string validationError))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(validationError);
@@ -73,7 +74,7 @@ namespace clowncar
                 return 3;
             }
 
-            if (!s.Run(out string runError))
+            if (!state.Run(out string runError))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(runError);
@@ -105,10 +106,10 @@ namespace clowncar
             }
             else
             {
-                var assemblyVersion = "0.0.2";
+                
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Out.Write($"{Environment.NewLine}{FileName}"); Console.ResetColor();
-                Console.Out.WriteLine(" version " + assemblyVersion.ToString());
+                Console.Out.WriteLine(" version " + AssemblyVersion.ToString());
                 Console.Out.WriteLine("Turn markdown to html." + Environment.NewLine);
             }
 
@@ -125,7 +126,7 @@ namespace clowncar
 
     public static class Marko
     {
-        static MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+        static readonly MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
         public static string ToHtml(this string rawMarkdown)
         {
             rawMarkdown = rawMarkdown.Replace(".md)", ".html)");
@@ -224,7 +225,7 @@ pre {
         internal bool Run(out string errors)
         {
             errors = null;
-            var drt = DryRun ? "(dryrun)" : ""; //Dry Run token to put in output;
+            var drt = DryRun ? "(dry-run)" : ""; //Dry Run token to put in output;
 
             if (RawMarkdown != null) NoTemplate = NoTemplate || (DefaultTemplate == null);
 
@@ -345,7 +346,7 @@ pre {
 
         private static bool Generate(string fileName, string outputPath, string inputRootPath, string templateText, bool dryRun, bool lessNoise, out string errors)
         {
-            var drt = dryRun ? "(dryrun)" : "";
+            var drt = dryRun ? "(dry-run)" : "";
             errors = null;
             if (!File.Exists(fileName))
             {

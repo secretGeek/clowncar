@@ -90,7 +90,7 @@
 //  int verbose = 0;
 //  OptionSet p = new OptionSet ()
 //    .Add ("v", v => ++verbose)
-//    .Add ("name=|value=", v => Console.WriteLine (v));
+//    .Add ("name=|value=", v => Console.Out.WriteLine (v));
 //  p.Parse (new string[]{"-v", "--v", "/v", "-name=A", "/name", "B", "extra"});
 //
 // The above would parse the argument string array, and would invoke the
@@ -109,7 +109,7 @@
 // type:
 //
 //  var p = new OptionSet () {
-//    { "foo=", (Foo f) => Console.WriteLine (f.ToString ()) },
+//    { "foo=", (Foo f) => Console.Out.WriteLine (f.ToString ()) },
 //  };
 //
 // Random other tidbits:
@@ -339,8 +339,8 @@ namespace Mono.Options
         private Option option;
         private string name;
         private int index;
-        private OptionSet set;
-        private OptionValueCollection c;
+        private readonly OptionSet set;
+        private readonly OptionValueCollection c;
 
         public OptionContext(OptionSet set)
         {
@@ -386,10 +386,11 @@ namespace Mono.Options
 
     public abstract class Option
     {
-        string prototype, description;
+        private readonly string prototype;
+        private readonly string description;
         string[] names;
-        OptionValueType type;
-        int count;
+        readonly OptionValueType type;
+        readonly int count;
         string[] separators;
 
         protected Option(string prototype, string description)
@@ -572,7 +573,7 @@ namespace Mono.Options
     [Serializable]
     public class OptionException : Exception
     {
-        private string optionName;
+        private readonly string optionName;
 
         public Option Option { get; private set; }
         public OptionException()
@@ -634,7 +635,7 @@ namespace Mono.Options
             this.localizer = localizer;
         }
 
-        Converter<string, string> localizer;
+        readonly Converter<string, string> localizer;
 
         public Converter<string, string> MessageLocalizer
         {
@@ -721,14 +722,12 @@ namespace Mono.Options
 
         sealed class ActionOption : Option
         {
-            Action<OptionValueCollection> action;
+            readonly Action<OptionValueCollection> action;
 
             public ActionOption(string prototype, string description, int count, Action<OptionValueCollection> action)
                 : base(prototype, description, count)
             {
-                if (action == null)
-                    throw new ArgumentNullException("action");
-                this.action = action;
+                this.action = action ?? throw new ArgumentNullException("action");
             }
 
             protected override void OnParseComplete(OptionContext c)
@@ -769,14 +768,12 @@ namespace Mono.Options
 
         sealed class ActionOption<T> : Option
         {
-            Action<T> action;
+            readonly Action<T> action;
 
             public ActionOption(string prototype, string description, Action<T> action)
                 : base(prototype, description, 1)
             {
-                if (action == null)
-                    throw new ArgumentNullException("action");
-                this.action = action;
+                this.action = action ?? throw new ArgumentNullException("action");
             }
 
             protected override void OnParseComplete(OptionContext c)
@@ -787,14 +784,12 @@ namespace Mono.Options
 
         sealed class ActionOption<TKey, TValue> : Option
         {
-            OptionAction<TKey, TValue> action;
+            readonly OptionAction<TKey, TValue> action;
 
             public ActionOption(string prototype, string description, OptionAction<TKey, TValue> action)
                 : base(prototype, description, 2)
             {
-                if (action == null)
-                    throw new ArgumentNullException("action");
-                this.action = action;
+                this.action = action ?? throw new ArgumentNullException("action");
             }
 
             protected override void OnParseComplete(OptionContext c)
@@ -933,8 +928,7 @@ namespace Mono.Options
                 return true;
             }
 
-            string f, n, s, v;
-            if (!GetOptionParts(argument, out f, out n, out s, out v))
+            if (!GetOptionParts(argument, out string f, out string n, out string s, out string v))
             {
                 //unrecognised option! 
                 if (UnrecognizedOptions == null)
