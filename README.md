@@ -42,23 +42,26 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 
 You can use it to just convert raw markdown into html:
 
-    .\clowncar.exe --rawmarkdown="# Hello world!"
+    .\clowncar.exe --rawmarkdown="**Hello world!**"
 
 Result:
 
-    <h1 id="hello-world">Hello world!</h1>
+    <p><strong>Hello world!</strong></p>
 
 
-And you can use the literal string `\n` to indicate new lines, so that a "one-liner" can have multiple lines.
+And, when using the `--rawmarkdown` parameter, you can use the literal string `\n` in your markdown to indicate new lines, so that a "one-liner" can have multiple lines.
 
-    .\clowncar.exe --rawmarkdown="# Hello world!\n\n**new paragraph**"
+For example this input:
 
-Result:
+    .\clowncar.exe --rawmarkdown="**Hello world!**\n\n**new paragraph**"
 
-    <h1 id="hello-world">Hello world!</h1>
+...produces this result:
+
+    <p><strong>Hello world!</strong></p>
     <p><strong>new paragraph</strong></p>
 
-### Convert a single file (with default template or no template)
+
+### Convert a single file to html (with default template or no template)
 
     .\clowncar.exe --file="example.md"
 
@@ -72,7 +75,7 @@ To force it to use no template at all (i.e. just save the converted markdown, no
 
     .\clowncar.exe --file="example.md" --notemplate
 
-### A Word about Templates....
+### A brief explanation of templates....
 
 Before showing examples with templates, I must say a word about templates: **Basic**. They are *really* basic, as you will see.
 
@@ -100,9 +103,9 @@ All of the above is just pre-amble. Here is how you are really intended to use c
 
 Some suggestions:
 
-* You should specify an `--output` path, so that the results ends up somewhere other than intermingled with the markdown. 
+* You should specify an `--output` path, so that the results ends up somewhere other than intermingled with the markdown.
 * You should use the `--recurse` parameter if you have lots of subfolders that need to be generated as well.
-* You should use your own custom `--template` 
+* You should use your own custom `--template`
 
 
     .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse
@@ -131,7 +134,7 @@ Use the *Be Less Noisy Please* Parameter (`--lessnoise` or `-z`) to stop clownca
 
 It will still tell you about the files it generated, and the files it copied.
 
-To produce no output, redirect both standard and error streams to null, e.g. 
+To produce no output, redirect both standard and error streams to null, e.g.
 
     .\clowncar.exe -p="~\my-notes" -o="~\my-website" -t="template.clowntent" -r 2>&1 | out-null
 
@@ -142,7 +145,7 @@ To produce no output, redirect both standard and error streams to null, e.g.
 
 ### How to be safe... use `--dry-run`
 
-There is also an option called "dry run" (`--dry-run` or just `-d`) that will stop `clowncar` from actually writing/changing/copying any files. 
+There is also an option called "dry run" (`--dry-run` or just `-d`) that will stop `clowncar` from actually writing/changing/copying any files.
 
 Instead, it will just show you what it *would* have done. (This is similar to the `-whatif` convention from Powershell, or the `--dry-run` flag in Angular)
 
@@ -177,8 +180,41 @@ Clowncar was originally created for the sole purpose of re-building my 'today-i-
 
 I am not sure. I need to add a contributing file, blog about it, add some more features, survive this global pandemic, get my life in order. Y'know... the usual.
 
+
+### Proposed feature:  pack the entire clowncar tool into a single self-contained executable/binary
+
 Currently the build does *not* pack the entire clowncar tool into a single self-contained executable/binary. I will do that once it becomes a standard part of .net core, soonish. (I'm not going to use one of those existing assembly weavers such as [fody](https://github.com/Fody/Fody) though they do sound interesting.)
+
+### Proposed feature: well known themes
 
 I'd like to have some well-known-themes/templates that clowncar can applied. A list of available themes would be discovered by checking: `clowntown.secretgeek.net/themes/` (for example) and if you say `clowncare.exe --famous-theme=minimal-dark` then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and then it will download them (including their relative paths), for use by the generator. Some kind of very simple file-based api, that I can maintain it by having people do pull requests to a git repo, hosted by github pages.
 
+### Proposed feature: fancy templates
+
+What good is a clown that can't juggle?? The templating language is not currently a language. I could switch it up by using the asp.net core `razor` templating language, or some kind of javascript interpreted nonsense. Model info could be embedded in a document by using YAML front matter.
+
+
+### Proposed feature: Ascii-art in the console output
+
+What was I thinking! I made a console tool, in 2020, that doesn't output any asci-art in its messages.
+
+There should be, at a minimum, the word 'clowncar' in ascii-font (see http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar) and an ascii clown, in *color*.
+
+          __
+    .---.|  |.----.--.--.--.-----.----.---.-.----.
+    |  __|  |  _  |  |  |  |     |  __|  _  |   _|
+    |____|__|_____|________|__|__|____|___._|__|
+
+            _
+           {_}
+           /*\
+          /_*_\
+         {('o')}
+      C{{([^*^])}}D
+          [ * ]
+         /  Y  \
+        _\__|__/_
+       (___/ \___)
+
+....all of which just serves to remind me that I friggin hate clowns! *<:o)
 
