@@ -13,7 +13,7 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 
 
 
-## Help -- usage
+## Help
 
     > .\clowncar.exe -?
     clowncar version 0.0.3
@@ -29,14 +29,14 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
         -o, --output=VALUE         output path
         -t, --template=VALUE       template file name
         -n, --notemplate           no template!
-        -d, --dry-run               dry run
+        -d, --dry-run              dry run
         -z, --lessnoise            less noise in output
         -?, -h, --help             this message
 
     (* Only use one of these 3 input options)
 
 
-## Examples:
+## Examples
 
 ### Simplest possible example
 
@@ -58,7 +58,7 @@ Result:
     <h1 id="hello-world">Hello world!</h1>
     <p><strong>new paragraph</strong></p>
 
-### Convert a single file (with default template or none)
+### Convert a single file (with default template or no template)
 
     .\clowncar.exe --file="example.md"
 
@@ -68,9 +68,9 @@ And you will see output in the console such as:
 
     ~~> .\example.html 508 chars, defaultTemplate
 
-To force it to use no template at all (just save the converted markdown) use the `--notemplate` flag
+To force it to use no template at all (i.e. just save the converted markdown, not wrapped inside a html page) use the `--notemplate` flag
 
-    .\clowncar.exe --file="example.md" --nottemplate
+    .\clowncar.exe --file="example.md" --notemplate
 
 ### A Word about Templates....
 
@@ -123,11 +123,11 @@ The meanings of each type of output are based on the first few characters, to wi
 
 (Note that copying of files will only happen if an "output path" (`--output`, `-o`) is specified.)
 
-## Want less noise from the console?
+## Want less *noise* from the console?
 
-Because **many** files can be skipped (particularly if there are `.git` or `node_modules` folders present.) the console output can be quite noisy 
+Because *many* files are skipped (particularly if there are `.git` or `node_modules` folders present) the console output can be quite noisy.
 
-Use the Less Noise Paramaeter (`--lessnoise` or `-z`) to stop clowncar from telling you about the files it has skipped.
+Use the *Be Less Noisy Please* Parameter (`--lessnoise` or `-z`) to stop clowncar from telling you about the files it has skipped.
 
 It will still tell you about the files it generated, and the files it copied.
 
@@ -142,9 +142,9 @@ To produce no output, redirect both standard and error streams to null, e.g.
 
 ### How to be safe... use `--dry-run`
 
-There is also an option called "dry run" (`--dry-run` or just `-d`) that will not stop `clowncar` from actually changing any files. 
+There is also an option called "dry run" (`--dry-run` or just `-d`) that will stop `clowncar` from actually writing/changing/copying any files. 
 
-Instead, it will just show you what it *would* have done. (This is similar to the `-whatif` convention from Powershell.)
+Instead, it will just show you what it *would* have done. (This is similar to the `-whatif` convention from Powershell, or the `--dry-run` flag in Angular)
 
 The messages sent to the console are the same, except that every line of text has `(dry-run)` before it. So for example you might see:
 
@@ -158,8 +158,7 @@ Our example above would become:
 
     .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dry-run
 
-To make no changes and see now output you could use:
-
+To make no changes and see *no* output you could use:
 
     .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dry-run 2>&1> $null
 
@@ -171,13 +170,15 @@ Here's a website I built using clowncar:
 
  * **[til.secretgeek.net](https://til.secretgeek.net)** &mdash; website built with clowncar, based on [these markdown files](https://github.com/secretGeek/today-i-learned-staging)
 
+Clowncar was originally created for the sole purpose of re-building my 'today-i-learned' website, my own way.
+
 
 ## What's next?
 
 I am not sure. I need to add a contributing file, blog about it, add some more features, survive this global pandemic, get my life in order. Y'know... the usual.
 
-Currently the build does *not* pack the entire thing into a single self-contained executable/binary. I will do that once it becomes a standard part of .net core, soonish. (I'm not going to use one of those existing assembly weavers such as [fody](https://github.com/Fody/Fody) though they do sound interesting.)
+Currently the build does *not* pack the entire clowncar tool into a single self-contained executable/binary. I will do that once it becomes a standard part of .net core, soonish. (I'm not going to use one of those existing assembly weavers such as [fody](https://github.com/Fody/Fody) though they do sound interesting.)
 
-I'd like to have some well-known-themes/templates that can be applied. A list of available themes is discovered by checking: clowntown.secretgeek.net/themes/ (for example) and if you say "clowncare.exe --famous-theme=minimal-dark" then it will look for a list of files and their relative path, from a page returned from clowntown.secretgeek.net/themes/minimal-dark/, and it then downloads each file in that list, and puts them in the relative path, for use by the generator. Some kind of very simple file-based api, that I can maintain by having people do push requsts to a folder at a site.
+I'd like to have some well-known-themes/templates that clowncar can applied. A list of available themes would be discovered by checking: `clowntown.secretgeek.net/themes/` (for example) and if you say `clowncare.exe --famous-theme=minimal-dark` then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and then it will download them (including their relative paths), for use by the generator. Some kind of very simple file-based api, that I can maintain it by having people do pull requests to a git repo, hosted by github pages.
 
 
