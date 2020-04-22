@@ -35,6 +35,8 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 
     (* Only use one of these 3 input options)
 
+![clowncar help](clowncar_help.png)
+
 
 ## Examples
 
@@ -194,27 +196,26 @@ I'd like to have some well-known-themes/templates that clowncar can applied. A l
 What good is a clown that can't juggle?? The templating language is not currently a language. I could switch it up by using the asp.net core `razor` templating language, or some kind of javascript interpreted nonsense. Model info could be embedded in a document by using YAML front matter.
 
 
-### Proposed feature: Ascii-art in the console output
+## About the ascii-art in the console output
 
-What was I thinking! I made a console tool, in 2020, that doesn't output any asci-art in its messages.
+What was I thinking! 
 
-There should be, at a minimum, the word 'clowncar' in ascii-font (see http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar) and an ascii clown, in *color*.
 
-          __
-    .---.|  |.----.--.--.--.-----.----.---.-.----.
-    |  __|  |  _  |  |  |  |     |  __|  _  |   _|
-    |____|__|_____|________|__|__|____|___._|__|
+                           ============================  *
+                        -----------------------------   /o\
+          __          ..............................  {('O')}
+    .---.|  |.----.--.--.--.-----.----.---.-.----.  C((/ o \))D
+    |  __|  |  _  |  |  |  |     |  __|  _  |   _|  __(__|__)__
+    |____|__|_____|________|__|__|____|___._|__|   (____/ \____)
 
-            _
-           {_}
-           /*\
-          /_*_\
-         {('o')}
-      C{{([^*^])}}D
-          [ * ]
-         /  Y  \
-        _\__|__/_
-       (___/ \___)
 
-....all of which just serves to remind me that I friggin hate clowns! *<:o)
+Font is from here --  http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar
+
+
+....all of which just serves to remind me that *I friggin' hate clowns!*
+
+Maybe I should've just gone with the emoticon.
+
+`*<:o)`
+
 

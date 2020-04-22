@@ -13,6 +13,8 @@ namespace clowncar
 
         static int Main(string[] args)
         {
+            //args = new string[] { "-?" };
+            //args[0] = "-?";
             var state = new State();
             var show_help = false;
             var p = new OptionSet() {
@@ -106,11 +108,12 @@ namespace clowncar
             }
             else
             {
+                WriteLogo();
                 
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Out.Write($"{Environment.NewLine}{FileName}"); Console.ResetColor();
                 Console.Out.WriteLine(" version " + AssemblyVersion.ToString());
-                Console.Out.WriteLine("Turn markdown to html." + Environment.NewLine);
+                Write("`aturn markdown to html `W(`Ro`W:`E>`Y*");
             }
 
             Console.Out.Write("Usage: ");
@@ -121,6 +124,60 @@ namespace clowncar
             Console.Out.WriteLine();
             Console.Out.WriteLine("Options:");
             p.WriteOptionDescriptions(Console.Out);
+        }
+
+        private static void WriteLogo()
+        {
+            Write(Environment.NewLine);
+            Write(@"`r===================================================`M  *");
+            Write(@"`R-------------------------------------------------`E   /`Mo`E\");
+            Write(@"`Y......`C__`Y........................................`R  {`W('`RO`W')`R}");
+            Write(@"`C.---.|  |.----.--.--.--.-----.----.---.-.----.  `WC`E((/ `Mo`E \))`WD");
+            Write(@"`C|  __|  |  _  |  |  |  |     |  __|  _  |   _| `M __`E(__|__)`M__");
+            Write(@"`C|____|__|_____|________|__|__|____|___._|__|  `M (_____|_____)");
+        }
+        private static void Write(string message, bool noNewLine = false)
+        {
+            // Always put a color at the start of the line, if it doesn't start with a color.
+            if (!message.StartsWith("`")) message = "`G" + message;
+
+            var parts = message.Split("`", StringSplitOptions.RemoveEmptyEntries);
+            if (parts != null && parts.Length > 0)
+            {
+                foreach (var p in parts)
+                {
+                    var color = ParseColor(p[0]);
+                    Console.ForegroundColor = color;
+                    Console.Write(p.Substring(1));
+                    Console.ResetColor();
+                }
+            }
+
+            if (!noNewLine) Console.Write(Environment.NewLine);
+        }
+
+        private static ConsoleColor ParseColor(char v)
+        {
+            switch (v)
+            {
+                case 'l': return ConsoleColor.Black;
+                case 'b': return ConsoleColor.DarkBlue;
+                case 'g': return ConsoleColor.DarkGreen;
+                case 'c': return ConsoleColor.DarkCyan;
+                case 'r': return ConsoleColor.DarkRed;
+                case 'm': return ConsoleColor.DarkMagenta;
+                case 'y': return ConsoleColor.DarkYellow;
+                case 'A': return ConsoleColor.Gray;
+                case 'a': return ConsoleColor.DarkGray;
+                case 'B': return ConsoleColor.Blue;
+                case 'E': return ConsoleColor.Green;
+                case 'C': return ConsoleColor.Cyan;
+                case 'R': return ConsoleColor.Red;
+                case 'M': return ConsoleColor.Magenta;
+                case 'Y': return ConsoleColor.Yellow;
+                case 'W': return ConsoleColor.White;
+                default: return ConsoleColor.Gray;
+            }
         }
     }
 
