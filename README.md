@@ -35,7 +35,6 @@ The markdown conversion is provided by [markdig](https://github.com/lunet-io/mar
 
     (* Only use one of these 3 input options)
 
-![clowncar help](clowncar_help.png)
 
 
 ## Examples
@@ -109,8 +108,7 @@ Some suggestions:
 * You should use the `--recurse` parameter if you have lots of subfolders that need to be generated as well.
 * You should use your own custom `--template`
 
-
-    .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse
+      .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse
 
 You'll see 1 line of output from clowncar about every single file it encounters. There are a few different lines you'll see:
 
@@ -189,7 +187,7 @@ Currently the build does *not* pack the entire clowncar tool into a single self-
 
 ### Proposed feature: well known themes
 
-I'd like to have some well-known-themes/templates that clowncar can applied. A list of available themes would be discovered by checking: `clowntown.secretgeek.net/themes/` (for example) and if you say `clowncare.exe --famous-theme=minimal-dark` then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and then it will download them (including their relative paths), for use by the generator. Some kind of very simple file-based api, that I can maintain it by having people do pull requests to a git repo, hosted by github pages.
+I'd like to have some well-known-themes/templates that clowncar can applied. A list of available themes would be discovered by checking: `clowntown.secretgeek.net/themes/` (for example) and if you say `clowncare.exe --famous-theme=minimal-dark` then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and then it will download them (including their relative paths), for use by the generator. Ideally the themes would be a very simple file-based collection, that people can contribute to sending pull requests to a git repo, hosted by github pages.
 
 ### Proposed feature: fancy templates
 
@@ -200,6 +198,8 @@ What good is a clown that can't juggle?? The templating language is not currentl
 
 What was I thinking! 
 
+![clowncar help](clowncar_help.png)
+
 
                            ============================  *
                         -----------------------------   /o\
@@ -209,10 +209,9 @@ What was I thinking!
     |____|__|_____|________|__|__|____|___._|__|   (____/ \____)
 
 
-Font is from here --  http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar
+The AsciiFont is from here --  http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar
 
-
-....all of which just serves to remind me that *I friggin' hate clowns!*
+...and creating that just serves to remind me that *I friggin' hate clowns!*
 
 Maybe I should've just gone with the emoticon.
 
