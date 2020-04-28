@@ -186,7 +186,7 @@ namespace clowncar
         static readonly MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
         public static string ToHtml(this string rawMarkdown)
         {
-            rawMarkdown = rawMarkdown.Replace(".md)", ".html)");
+            rawMarkdown = rawMarkdown.Replace(".md)", ".html)").Replace(".md#", ".html#");
             return Markdown.ToHtml(rawMarkdown, pipeline);
         }
     }
