@@ -4,3 +4,4 @@ cd bin\Release\netcoreapp2.1\win10-x64\publish\; dir *.exe # see Win executable
 dotnet publish -c Release -r ubuntu.16.10-x64 # compile ubuntu version
 cd bin\Release\netcoreapp2.1\ubuntu.16.10-x64\publish\; dir clown* # see ubuntu version
 cd bin\debug\netcoreapp2.1;dotnet .\clowncar.dll # run debug
+n ..\TODO.md

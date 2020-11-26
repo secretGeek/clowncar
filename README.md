@@ -187,11 +187,25 @@ Currently the build does *not* pack the entire clowncar tool into a single self-
 
 ### Proposed feature: well known themes
 
-I'd like to have some well-known-themes/templates that clowncar can applied. A list of available themes would be discovered by checking: `clowntown.secretgeek.net/themes/` (for example) and if you say `clowncare.exe --famous-theme=minimal-dark` then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and then it will download them (including their relative paths), for use by the generator. Ideally the themes would be a very simple file-based collection, that people can contribute to sending pull requests to a git repo, hosted by github pages.
+I'd like to have some well-known-themes/templates that clowncar can apply.
+
+A list of available themes would be discovered by checking: 
+
+    clowntown.secretgeek.net/themes/
+
+(for example), and if you say:
+
+    clowncar.exe --famous-theme=minimal-dark
+
+...then it will ask `clowntown.secretgeek.net/themes/minimal-dark/` for a list of all files used by this theme, and download them (including their relative paths), for use by the generator.
+
+Ideally such a theme would be a very simple file-based collection, that people can contribute to by sending pull requests to a git repo, hosted by github pages. As hinted above I would call that repository "clowntown" to continue the clown-motif which I already bitterly bitterly regret.
 
 ### Proposed feature: fancy templates
 
-What good is a clown that can't juggle?? The templating language is not currently a language. I could switch it up by using the asp.net core `razor` templating language, or some kind of javascript interpreted nonsense. Model info could be embedded in a document by using YAML front matter.
+What good is a clown that can't juggle?? The templating language is not currently much of a language. (All it does is a few search/replaces)
+
+I could switch it up by using the asp.net core `razor` templating language, or some kind of javascript interpreted nonsense. Model info could be embedded in a document by using YAML front matter.
 
 
 ## About the ascii-art in the console output
@@ -211,7 +225,7 @@ What was I thinking!
 
 The AsciiFont is from here --  http://patorjk.com/software/taag/#p=testall&f=Alpha&t=clowncar
 
-...and creating that just serves to remind me that *I friggin' hate clowns!*
+...and creating that just served to remind me that *I friggin' hate clowns!*
 
 Maybe I should've just gone with the emoticon.
 
