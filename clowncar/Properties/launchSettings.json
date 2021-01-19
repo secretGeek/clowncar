@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "clowncar": {
+      "commandName": "Project",
+      "commandLineArgs": "-p=\"C:\\users\\leonb\\Dropbox\\secretGeek\\all_someday_projects\\git_playground\\today-i-learned-staging\" -o=\"C:\\users\\leonb\\Dropbox\\secretGeek\\all_someday_projects\\git_playground\\today-i-learned\" -t=\"C:\\users\\leonb\\Dropbox\\secretGeek\\all_someday_projects\\git_playground\\today-i-learned\\template.clowntent\" -r -z"
+    }
+  }
+}

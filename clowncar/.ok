@@ -1,7 +1,7 @@
-..\clowncar.sln # open in Visual Studio
-dotnet publish -c Release -r win10-x64; ok 3 # compile to win executable
+edit:..\clowncar.sln # open in Visual Studio
+win-build:dotnet publish -c Release -r win10-x64; # compile to win executable
 cd bin\Release\netcoreapp2.1\win10-x64\publish\; dir *.exe # see Win executable
-dotnet publish -c Release -r ubuntu.16.10-x64 # compile ubuntu version
+linux-build:dotnet publish -c Release -r ubuntu.16.10-x64 # compile ubuntu version
 cd bin\Release\netcoreapp2.1\ubuntu.16.10-x64\publish\; dir clown* # see ubuntu version
-cd bin\debug\netcoreapp2.1;dotnet .\clowncar.dll # run debug
-n ..\TODO.md
+debug:cd bin\debug\netcoreapp2.1;dotnet .\clowncar.dll # run debug
+todo: n ..\TODO.md
