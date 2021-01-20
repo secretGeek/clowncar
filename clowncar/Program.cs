@@ -12,9 +12,7 @@ namespace clowncar
 
         static int Main(string[] args)
         {
-            //args = new string[] { "-?" };
-            //args[0] = "-?";
-            var state = new State();
+            var state = new Settings();
             var show_help = false;
             var p = new OptionSet() {
                 {"m|rawmarkdown=",  "the raw markdown *", v => state.RawMarkdown = v},
@@ -77,9 +75,7 @@ namespace clowncar
 
             //************************************************
             //************************************************
-            //var (success, errors) = await state.Run();
-            var (success, errors) = new Runner(state).Run().ConfigureAwait(false).GetAwaiter().GetResult();
-            //if (!state.Run(out string runError))
+            var (success, errors) = new Runner(state).Run().GetAwaiter().GetResult();
             //************************************************
             //************************************************
 
@@ -166,7 +162,7 @@ namespace clowncar
             if (!noNewLine) Console.Write(Environment.NewLine);
         }
 
-        private static Dictionary<char, ConsoleColor> colors = new Dictionary<char, ConsoleColor>
+        private static readonly Dictionary<char, ConsoleColor> colors = new Dictionary<char, ConsoleColor>
         {
             { 'l', ConsoleColor.Black },
             { 'b', ConsoleColor.DarkBlue },
