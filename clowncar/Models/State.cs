@@ -224,7 +224,7 @@ namespace clowncar.Models
             var inputFilePath = Path.GetDirectoryName(f);
             var relativePath = Path.GetRelativePath(inputPath, inputFilePath);
             var targetFileName = Path.Combine(outputPath, relativePath, Path.GetFileName(f));
-            if (inputFilePath.ToLowerInvariant().StartsWith(outputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
+            if (!inputFilePath.ToLowerInvariant().StartsWith(outputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
             {
                 if (!lessNoise)
                 {

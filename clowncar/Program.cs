@@ -140,6 +140,7 @@ namespace clowncar
                 Write(@"`C.---.|  |.----.--.--.--.-----.----.---.-.----.  `WC`E((/ `Mo`E \))`WD");
                 Write(@"`C|  __|  |  _  |  |  |  |     |  __|  _  |   _| `M __`E(__|__)`M__");
                 Write(@"`C|____|__|_____|________|__|__|____|___._|__|  `M (_____|_____)");
+                Write(@"`C2021 edition!");
             }
         }
         private static void Write(string message, bool noNewLine = false)
