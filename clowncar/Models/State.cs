@@ -224,10 +224,12 @@ namespace clowncar.Models
             var inputFilePath = Path.GetDirectoryName(f);
             var relativePath = Path.GetRelativePath(inputPath, inputFilePath);
             var targetFileName = Path.Combine(outputPath, relativePath, Path.GetFileName(f));
-            if (!inputFilePath.ToLowerInvariant().StartsWith(outputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
+            if (inputFilePath.ToLowerInvariant().StartsWith(outputPath.ToLowerInvariant() + Path.DirectorySeparatorChar))
             {
                 if (!lessNoise)
                 {
+                    //Console.Out.WriteLine("Input file path: " + inputFilePath.ToLowerInvariant());
+                    //Console.Out.WriteLine("Output path: " + outputPath.ToLowerInvariant() + Path.DirectorySeparatorChar);
                     Console.Out.WriteLine($"{drt}xx> (skipped:subsite) {Path.Combine(relativePath, Path.GetFileName(f))}");
                 }
                 return;
