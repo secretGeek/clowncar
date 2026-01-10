@@ -150,7 +150,6 @@ namespace clowncar.Models
             }
         }
 
-
         private static async Task<(bool success, string errors)> GenerateAll(string inputPath, string outputPath, string inputRootPath, string templateText, bool dryRun, bool lessNoise, bool recurse)
         {
             var generateAvailable = new AutoResetEvent(false);

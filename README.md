@@ -87,7 +87,7 @@ A template is just a plain `html` file, but with these two special tokens embedd
  * `{{body}}` &mdash; Put this token where you want the generated HTML to go.
  * `{{title}}` &mdash; The title of the document, which will be based on the name of the markdown file (with underscores replaced by spaces)
 
-There are no other fancy features or capabilities in the template language. It's not even a language, just a literal file with two tokens that get replaced. That's it.
+There are no other fancy features or capabilities in the `clowntent` template language. It's not even a language, just a *literal* html file, with two tokens that, if present, will get replaced. That's it.
 
 ### Example of using a template
 
@@ -165,7 +165,7 @@ To make no changes and see *no* output you could use:
 
     .\clowncar.exe --path="~\my-notes" --output="~\my-website" --template="template.clowntent" --recurse --dry-run 2>&1> $null
 
-...or just don't run *any* command.
+...or (faster still) just don't run *any* command. 
 
 ## Live Demonstration
 
@@ -215,9 +215,9 @@ What was I thinking!
 ![clowncar help](clowncar_help.png)
 
 
-                           ============================  *
-                        -----------------------------   /o\
-          __          ..............................  {('O')}
+                =   =   =  = ==========================  *
+          -    -   -  - -----------------------------   /o\
+         .__.  .  . . ..............................  {('O')}
     .---.|  |.----.--.--.--.-----.----.---.-.----.  C((/ o \))D
     |  __|  |  _  |  |  |  |     |  __|  _  |   _|  __(__|__)__
     |____|__|_____|________|__|__|____|___._|__|   (____/ \____)
@@ -227,8 +227,4 @@ The AsciiFont is from here --  http://patorjk.com/software/taag/#p=testall&f=Alp
 
 ...and creating that just served to remind me that *I friggin' hate clowns!*
 
-Maybe I should've just gone with the emoticon.
-
-`*<:o)`
-
-
+Maybe I should've just gone with the emoticon. `*<:o)`

@@ -1,0 +1,5 @@
+n .\README.md # VIEW README
+code . .\README.md # EDIT Main folder
+. .\clowncar.sln # EDIT with IDE (Visual Studio in this case)
+& .\clowncar\bin\Release\netcoreapp2.1\win10-x64\publish\clowncar.exe --help # RUN the output, play test the project.
+

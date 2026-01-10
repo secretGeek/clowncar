@@ -16,8 +16,8 @@ namespace clowncar
             var show_help = false;
             var p = new OptionSet() {
                 {"m|rawmarkdown=",  "the raw markdown *", v => state.RawMarkdown = v},
-                {"f|file=",         "input file name *",  v => state.FileName = v},
-                {"p|path=",         "path *",             v => state.InputPath = v },
+                {"f|file=",         "input file name  *", v => state.FileName = v},
+                {"p|path=",         "path             *", v => state.InputPath = v },
                 {"r|recurse",       "recurse",            v => state.Recurse = v != null },
                 {"o|output=",       "output path",        v => state.OutputPath = v },
                 {"t|template=",     "template file name",      v => state.DefaultTemplate = v },
